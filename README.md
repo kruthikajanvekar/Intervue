@@ -184,17 +184,6 @@ curl localhost:8000/api/v1/feedback/<id>/pdf -o report.pdf
 - **Deployment**: multi-service `docker-compose` (API, Mongo, Mongo Express),
   container healthcheck, `Makefile` for the common dev loop.
 
-## Known gaps / natural next steps
 
-- No frontend included — this is the backend/API layer. A React/Next.js
-  client would call `/interviews/start`, stream mic audio to
-  `/interviews/{id}/answer`, and play back the returned MP3.
-- Auth is a per-interview JWT, not full user accounts — fine for a demo,
-  swap in real auth (e.g. OAuth2 + a `users` collection) for multi-tenant use.
-- No streaming; ElevenLabs and the LLM are called request/response style.
-  ElevenLabs' streaming endpoint + FastAPI `StreamingResponse` would cut
-  perceived latency for a more "live" feel.
-- `faster-whisper` local mode loads the model lazily on first request inside
-  the container — fine for a demo, but pre-warm it in a real deployment.
 
 
