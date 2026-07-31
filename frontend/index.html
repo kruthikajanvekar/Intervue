@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Intervue — AI Technical Interviewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">Intervue</span>
+    </div>
+    <div class="topbar-meta" id="topbar-meta" hidden>
+      <span class="meta-item"><span class="meta-label">Candidate</span><span class="meta-value" id="meta-candidate">—</span></span>
+      <span class="meta-divider"></span>
+      <span class="meta-item"><span class="meta-label">Role</span><span class="meta-value" id="meta-role">—</span></span>
+      <span class="meta-divider"></span>
+      <span class="meta-item"><span class="meta-label">Elapsed</span><span class="meta-value mono" id="meta-timer">00:00</span></span>
+    </div>
+    <div class="conn-status" id="conn-status">
+      <span class="conn-dot" id="conn-dot"></span>
+      <span id="conn-label">checking backend…</span>
+    </div>
+  </header>
+
+  <main class="stage-area">
+
+    <!-- ============ VIEW: SETUP ============ -->
+    <section class="view active" id="view-setup">
+      <div class="setup-wrap">
+        <div class="setup-copy">
+          <span class="eyebrow">Live spoken interview</span>
+          <h1>An interviewer that actually<br/>listens, and pushes back.</h1>
+          <p class="lede">
+            Intervue asks a question out loud, listens to your spoken answer, scores it on
+            correctness, depth, communication and confidence — then decides whether to dig
+            deeper or move on. Difficulty adapts as you go.
+          </p>
+          <ul class="setup-features">
+            <li><span class="feat-dot"></span>Adaptive difficulty, question to question</li>
+            <li><span class="feat-dot"></span>Real evaluator scoring on every answer</li>
+            <li><span class="feat-dot"></span>Structured PDF report at the end</li>
+          </ul>
+        </div>
+
+        <form class="setup-card" id="setup-form" autocomplete="off">
+          <span class="setup-card-label">New session</span>
+
+          <label class="field">
+            <span class="field-label">Your name</span>
+            <input type="text" id="f-name" placeholder="e.g. Kruthika" required />
+          </label>
+
+          <label class="field">
+            <span class="field-label">Role you're interviewing for</span>
+            <input type="text" id="f-role" placeholder="e.g. AI/ML Engineer" required />
+          </label>
+
+          <label class="field">
+            <span class="field-label">Experience level</span>
+            <select id="f-level">
+              <option value="junior">Junior</option>
+              <option value="mid" selected>Mid</option>
+              <option value="senior">Senior</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Focus areas <span class="field-optional">(comma separated)</span></span>
+            <input type="text" id="f-focus" placeholder="e.g. RAG systems, python, system design" />
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-full" id="btn-start">
+            <span>Begin interview</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <label class="api-field">
+            <span class="field-label">Backend URL</span>
+            <input type="text" id="f-apibase" value="http://localhost:8000/api/v1" />
+          </label>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: INTERVIEW ============ -->
+    <section class="view" id="view-interview">
+
+      <div class="session-strip">
+        <div class="progress-track" id="progress-track" aria-label="Question progress"></div>
+        <div class="difficulty-gauge">
+          <span class="diff-label">Difficulty</span>
+          <div class="diff-rungs">
+            <span class="rung" data-level="easy">Easy</span>
+            <span class="rung" data-level="medium">Medium</span>
+            <span class="rung" data-level="hard">Hard</span>
+            <span class="rung-marker" id="rung-marker"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+
+        <div class="question-card">
+          <div class="speaker-row">
+            <span class="speaker-tag" id="speaker-tag">Interviewer</span>
+            <div class="waveform" id="waveform">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <p class="question-text" id="question-text">Preparing your first question…</p>
+          <span class="subtopic-chip" id="subtopic-chip" hidden></span>
+        </div>
+
+        <div class="transcript" id="transcript" aria-label="Conversation transcript"></div>
+
+        <div class="eval-strip" id="eval-strip" hidden>
+          <span class="eval-strip-label">Last answer</span>
+          <div class="eval-bars">
+            <div class="eval-bar-item">
+              <span class="eval-bar-name">Correctness</span>
+              <div class="eval-bar-track"><div class="eval-bar-fill" id="bar-correctness"></div></div>
+            </div>
+            <div class="eval-bar-item">
+              <span class="eval-bar-name">Depth</span>
+              <div class="eval-bar-track"><div class="eval-bar-fill" id="bar-depth"></div></div>
+            </div>
+            <div class="eval-bar-item">
+              <span class="eval-bar-name">Communication</span>
+              <div class="eval-bar-track"><div class="eval-bar-fill" id="bar-communication"></div></div>
+            </div>
+            <div class="eval-bar-item">
+              <span class="eval-bar-name">Confidence</span>
+              <div class="eval-bar-track"><div class="eval-bar-fill" id="bar-confidence"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="answer-panel">
+          <div class="answer-mode-toggle">
+            <button class="mode-btn active" id="mode-voice" type="button">Speak answer</button>
+            <button class="mode-btn" id="mode-text" type="button">Type answer</button>
+          </div>
+
+          <div class="answer-voice" id="answer-voice">
+            <button class="record-btn" id="btn-record" type="button" aria-pressed="false">
+              <span class="record-btn-icon" aria-hidden="true"></span>
+              <span class="record-btn-label" id="record-label">Start recording</span>
+            </button>
+            <span class="record-hint" id="record-hint">Click to record, click again to send your answer.</span>
+          </div>
+
+          <div class="answer-text" id="answer-text" hidden>
+            <textarea id="f-answer-text" rows="3" placeholder="Type your answer here…"></textarea>
+            <button class="btn btn-secondary" id="btn-send-text" type="button">Send answer</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ VIEW: REPORT ============ -->
+    <section class="view" id="view-report">
+      <div class="report-wrap">
+
+        <div class="report-header">
+          <span class="eyebrow">Interview complete</span>
+          <h1 id="report-name">Feedback report</h1>
+        </div>
+
+        <div class="report-score-row">
+          <div class="score-dial-wrap">
+            <svg class="score-dial" viewBox="0 0 140 140" width="140" height="140">
+              <circle cx="70" cy="70" r="60" class="score-track" />
+              <circle cx="70" cy="70" r="60" class="score-fill" id="score-fill" />
+            </svg>
+            <div class="score-dial-center">
+              <span class="score-number" id="score-number">—</span>
+              <span class="score-outof">/ 100</span>
+            </div>
+          </div>
+          <div class="report-headline">
+            <span class="rec-badge" id="rec-badge">—</span>
+            <p class="report-summary" id="report-summary">Generating your report…</p>
+          </div>
+        </div>
+
+        <div class="report-columns">
+          <div class="report-col">
+            <h3 class="report-col-title">Strengths</h3>
+            <ul class="report-list good" id="list-strengths"></ul>
+          </div>
+          <div class="report-col">
+            <h3 class="report-col-title">Areas to improve</h3>
+            <ul class="report-list bad" id="list-weaknesses"></ul>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3 class="report-col-title">Communication</h3>
+          <p class="report-body" id="report-comm"></p>
+        </div>
+
+        <div class="report-section">
+          <h3 class="report-col-title">Recommended topics to study</h3>
+          <div class="topic-chips" id="topic-chips"></div>
+        </div>
+
+        <div class="report-section">
+          <h3 class="report-col-title">Per-question breakdown</h3>
+          <table class="breakdown-table" id="breakdown-table">
+            <thead><tr><th>Subtopic</th><th>Score</th><th>Note</th></tr></thead>
+            <tbody id="breakdown-body"></tbody>
+          </table>
+        </div>
+
+        <div class="report-actions">
+          <button class="btn btn-primary" id="btn-download-pdf">
+            <span>Download PDF report</span>
+          </button>
+          <button class="btn btn-ghost" id="btn-restart">Start a new interview</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast-error" id="error-banner" hidden>
+    <span id="error-text"></span>
+    <button id="error-dismiss" aria-label="Dismiss">×</button>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
